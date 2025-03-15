@@ -1,13 +1,13 @@
 import express from 'express';
-import http from 'http';
+import { createServer } from 'http';
 import cors from 'cors';
 import { Server as SocketIOServer } from 'socket.io';
 import { GameManager } from './game/GameManager';
 import { CreateGameType, JoinGameType } from './types/gameTypes';
 
 const app = express();
-const server = http.createServer(app);
-const io = new SocketIOServer(server, {
+const httpServer = createServer(app);
+const io = new SocketIOServer(httpServer, {
     cors: {
         origin: '*',
     },
@@ -42,12 +42,21 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('rollDice', ({ gameId }) => {
+        const room = gameManager.getGame(gameId);
+        if (room) {
+            const diceNumber = room.rollDice();
+            io.to(gameId).emit('diceRolled', { diceNumber });
+            room.nextTurn();
+        }
+    });
+
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+httpServer.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
