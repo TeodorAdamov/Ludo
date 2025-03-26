@@ -1,13 +1,16 @@
 import { Player } from './Player';
 
 export class Room {
-    id: string;
+    gameName: string;
+    password: string;
     players: Player[];
+
     private maxPlayers: number = 4;
     private currentTurn: number = 0;
 
-    constructor(id: string) {
-        this.id = id;
+    constructor(gameName: string, password: string) {
+        this.gameName = gameName;
+        this.password = password;
         this.players = [];
     }
     addPlayer(id: string, name: string) {
@@ -26,5 +29,8 @@ export class Room {
     }
     getCurrentPlayer(): Player {
         return this.players[this.currentTurn];
+    }
+    getPlayers() {
+        return this.players;
     }
 }

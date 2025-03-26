@@ -7,11 +7,11 @@ export class GameManager {
     constructor() {
         this.games = new Map();
     }
-    createGame(): string {
-        const gameId = v4();
-        const room = new Room(gameId);
-        this.games.set(gameId, room);
-        return gameId;
+    createGame(gameName: string, password: string): string {
+        const room = new Room(gameName, password);
+        this.games.set(gameName, room);
+        console.log(this.games);
+        return gameName;
     }
     getGame(gameId: string): Room | undefined {
         return this.games.get(gameId);

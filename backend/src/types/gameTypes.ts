@@ -1,8 +1,5 @@
-export type CreateGameType = {
-    gameCreator: string;
-};
-
-export type JoinGameType = {
-    gameId: string;
+export type GameType = {
     playerName: string;
+    gameName: string;
+    password: string;
 };

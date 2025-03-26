@@ -3,7 +3,7 @@ import { createServer } from 'http';
 import cors from 'cors';
 import { Server as SocketIOServer } from 'socket.io';
 import { GameManager } from './game/GameManager';
-import { CreateGameType, JoinGameType } from './types/gameTypes';
+import { GameType } from './types/gameTypes';
 
 const app = express();
 const httpServer = createServer(app);
@@ -25,20 +25,40 @@ app.get('/', (_, res) => {
 io.on('connection', (socket) => {
     console.log('a user connected');
 
-    socket.on('createGame', ({ gameCreator }: CreateGameType) => {
-        const gameId = gameManager.createGame();
-        const room = gameManager.getGame(gameId);
-        if (room) {
-            room.addPlayer(socket.id, gameCreator);
+    socket.on('createRoom', ({ playerName, gameName, password }: GameType) => {
+        console.log(playerName, gameName, password);
+        const existingGame = gameManager.getGame(gameName);
+        if (existingGame) {
+            socket.emit('Create error', { message: 'Game already exists' });
+            return;
         }
-        socket.emit('game created and first player joined', { gameId });
-    });
 
-    socket.on('joinGame', ({ gameId, playerName }: JoinGameType) => {
-        const room = gameManager.getGame(gameId);
+        gameManager.createGame(gameName, password);
+        const room = gameManager.getGame(gameName);
         if (room) {
             room.addPlayer(socket.id, playerName);
-            io.to(gameId).emit('player joined', { players: room.players });
+            socket.join(gameName);
+            socket.emit('Room created', { gameName, players: room.players });
+        }
+    });
+
+    socket.on('joinGame', ({ playerName, gameName, password }: GameType) => {
+        const room = gameManager.getGame(gameName);
+        if (!room) {
+            socket.emit('Join error', { message: 'Game not found' });
+            return;
+        }
+        if (room.password !== password) {
+            socket.emit('Join error', { message: 'Invalid password' });
+            return;
+        }
+        if (room) {
+            room.addPlayer(socket.id, playerName);
+            socket.join(gameName);
+            io.to(room.gameName).emit('Player joined', {
+                gameName,
+                players: room.players,
+            });
         }
     });
 
