@@ -7,8 +7,39 @@ type GameFormProps = {
     isConnected: boolean;
 };
 
+const startingPosition = {
+    blue: {
+        1: { x: 11.4, y: 84.4 },
+        2: { x: 24.8, y: 84.4 },
+        3: { x: 11.4, y: 71.1 },
+        4: { x: 24.8, y: 71.1 },
+    },
+    red: {
+        1: { x: 11.4, y: 11.4 },
+        2: { x: 24.8, y: 11.4 },
+        3: { x: 11.4, y: 24.8 },
+        4: { x: 24.8, y: 24.8 },
+    },
+    green: {
+        1: { x: 84.4, y: 11.4 },
+        2: { x: 71.1, y: 11.4 },
+        3: { x: 84.4, y: 24.8 },
+        4: { x: 71.1, y: 24.8 },
+    },
+    yellow: {
+        1: { x: 84.4, y: 84.4 },
+        2: { x: 71.1, y: 84.4 },
+        3: { x: 84.4, y: 71.1 },
+        4: { x: 71.1, y: 71.1 },
+    },
+};
+
+type PinsType = (1 | 2 | 3 | 4)[];
+type Colors = 'red' | 'blue' | 'green' | 'yellow';
+
 const GameBoard = ({ socket, isConnected }: GameFormProps) => {
-    const [pins, setPins] = useState([]);
+    const [pins, setPins] = useState<PinsType>([1, 2, 3, 4]);
+    const [color, setColor] = useState<Colors>('yellow');
     const [boardSize, setBoardSize] = useState({ w: 800, h: 800 });
     const boardRef = useRef<HTMLDivElement>(null);
 
@@ -45,8 +76,12 @@ const GameBoard = ({ socket, isConnected }: GameFormProps) => {
                     style={{
                         width: `${(boardSize.w / 12) * 0.5}px`,
                         height: `${(boardSize.w / 12) * 0.5}px`,
-                        left: `${(pin.x / 100) * boardSize.w}px`,
-                        top: `${(pin.y / 100) * boardSize.w}px`,
+                        left: `${
+                            (startingPosition[color][pin].x / 100) * boardSize.w
+                        }px`,
+                        top: `${
+                            (startingPosition[color][pin].y / 100) * boardSize.w
+                        }px`,
                     }}
                 >
                     {/* Pin representation */}
